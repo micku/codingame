@@ -27,6 +27,8 @@ turn = 0
 
 ### Pathfinding
 class Board:
+    players = {}
+
     def __init__(self, w=None, h=None, board=None):
         if board is not None:
             self.clone(board)
@@ -85,6 +87,7 @@ class Board:
             if is_valid:
                 yield (k, new_pos)
     
+    
     ### Board construction
     def add_wall(self, pos, wall_orientation):
         wall_x, wall_y = pos
@@ -94,6 +97,13 @@ class Board:
         for i in range(3):
             self.the_map[x+(i if wall_orientation == 'H' else 0)][y+(i if wall_orientation == 'V' else 0)] \
                 = WALLS
+    
+    def add_player(self, pos, i, walls_left):
+        self.players[i] = (pos, walls_left)
+
+        (x, y) = pos
+        self.the_map[x*2][y*2] = i
+
 
     ### Utilities
     def __repr__(self):
@@ -137,13 +147,13 @@ class Node:
 while True:
     board = Board(w, h)
 
-    players = {}
     for i in range(player_count):
         # x: x-coordinate of the player
         # y: y-coordinate of the player
         # walls_left: number of walls available for the player
         x, y, walls_left = [int(j) for j in input().split()]
-        players[i] = (x, y, walls_left)
+        
+        board.add_player((x, y), i, walls_left)
     
     wall_count = int(input())  # number of walls on the board
     for i in range(wall_count):
@@ -156,10 +166,10 @@ while True:
         
         board.add_wall((wall_x, wall_y), wall_orientation)
 
-    my_position = (players[my_id][0], players[my_id][1])
+    my_position = board.players[my_id][0]
 
     # Go in the winning direction as first action, the board is empty!
-    goal = (8, my_position[1])
+    goal = (3, 7)
     shortest_path = board.shortest_path(my_position, goal)
     first_move = shortest_path.first_move()
 
