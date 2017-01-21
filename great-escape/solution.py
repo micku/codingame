@@ -139,7 +139,7 @@ class Board:
                 = WALLS
     
     def add_player(self, pos, i, walls_left):
-        self.players[i] = (pos, walls_left)
+        self.players[i] = (pos, walls_left, i == my_id)
 
         (x, y) = pos
         self.the_map[x*2][y*2] = i
@@ -206,15 +206,21 @@ while True:
         
         board.add_wall((wall_x, wall_y), wall_orientation)
 
-    my_position = board.players[my_id][0]
-    goal = board.nearest_point(my_position, EXITS[my_id])
-    shortest_path = board.shortest_path(my_position, goal)
-    first_move = shortest_path.first_move()
-
-    print(repr(board), file=sys.stderr)
+    if turn == 0:
+        opponent = next(filter(lambda x: x[2] == False, board.players.values()))
+        oppo_wall_pos = min(opponent[0][1], h - 2)
+        print(oppo_wall_pos, file=sys.stderr)
+        print('6 %s V' % oppo_wall_pos)
+    else:
+        my_position = board.players[my_id][0]
+        goal = board.nearest_point(my_position, EXITS[my_id])
+        shortest_path = board.shortest_path(my_position, goal)
+        first_move = shortest_path.first_move()
     
-    # action: LEFT, RIGHT, UP, DOWN or "putX putY putOrientation" to place a wall
-    print(first_move.direction)
+        #print(repr(board), file=sys.stderr)
+        
+        # action: LEFT, RIGHT, UP, DOWN or "putX putY putOrientation" to place a wall
+        print(first_move.direction)
 
-turn += 1
+    turn += 1
     
