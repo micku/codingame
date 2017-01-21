@@ -30,6 +30,8 @@ class Board:
     players = {}
 
     def __init__(self, w=None, h=None, board=None):
+        self.w = w
+        self.h = h
         if board is not None:
             self.clone(board)
         else:
@@ -88,6 +90,40 @@ class Board:
                 yield (k, new_pos)
     
     
+    ### Finds all possible walls positions
+    def is_wall_valid(self, pos, orientation):
+        map_pos = (pos[0]*2, pos[1]*2)
+        for i in range(3):
+            new_map_pos = (
+                map_pos[0] + i if orientation == 'H' else map_pos[0],
+                map_pos[1] + i if orientation == 'V' else map_pos[1]
+            )
+            if new_map_pos[0] >= len(self.the_map) \
+                or new_map_pos[1] >= len(self.the_map[0]) \
+                or self.the_map[new_map_pos[0]][new_map_pos[1]] == WALLS \
+                or i > 0 and min(list(new_map_pos)) == 0:
+                # Excludes:
+                # - wall occupied spaces
+                # - walls adjacent the borders
+                return False
+        return True
+    
+    def possible_walls_in_pos(self, pos):
+        for orientation in ['H', 'V']:
+            if self.is_wall_valid(pos, orientation):
+                yield (pos, orientation)
+
+    def possible_walls(self, pos=None):
+        if pos is None:
+            for y in range(1, self.w):
+                for x in range(1, self.h):
+                    pos = (x, y)
+                    for wall in self.possible_walls_in_pos(pos):
+                        yield wall
+        else:
+            for wall in self.possible_walls_in_pos(pos):
+                yield wall
+
     ### Board construction
     def add_wall(self, pos, wall_orientation):
         wall_x, wall_y = pos
