@@ -18,12 +18,13 @@ w, h, player_count, my_id = [int(i) for i in input().split()]
 opponent_id = [i for i in range(player_count) if i != my_id][0]
 win_obj = (8 if my_id == 0 else 0, None)
 
-winning_positions = {
+EXITS = {
     0: [(w-1, i) for i in range(h)],
     1: [(0, i) for i in range(h)],
 }
 
 turn = 0
+        
 
 ### Pathfinding
 class Board:
@@ -71,6 +72,9 @@ class Board:
     
     def heuristic_distance(self, space, goal): # TODO
         return math.sqrt((space[0] - goal[0])**2 + (space[1] - goal[1])**2)
+    
+    def nearest_point(self, pos, points):
+        return min(points, key=lambda x: self.heuristic_distance(pos, x))
 
     ### Finds all possible moves in the map
     def is_movement_valid(self, pos, direction):
@@ -203,9 +207,7 @@ while True:
         board.add_wall((wall_x, wall_y), wall_orientation)
 
     my_position = board.players[my_id][0]
-
-    # Go in the winning direction as first action, the board is empty!
-    goal = (3, 7)
+    goal = board.nearest_point(my_position, EXITS[my_id])
     shortest_path = board.shortest_path(my_position, goal)
     first_move = shortest_path.first_move()
 
