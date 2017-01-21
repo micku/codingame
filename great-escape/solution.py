@@ -36,16 +36,10 @@ class Board:
         if board is not None:
             self.clone(board)
         else:
-            self.the_map = [[' ' for x in range((w*2)-1)] for y in range((h*2)-1)]
-            for y in range(len(self.the_map)):
-                for x in range(len(self.the_map[y])):
-                    if y % 2 == 1:
-                        self.the_map[x][y] = '-'
-                    elif x % 2 == 1:
-                        self.the_map[x][y] = '|'
+            self.the_map = {}
 
     def clone(self, board):
-        self.the_map = [y[:] for y in board.the_map]
+        self.the_map = board.the_map.copy()
     
     def shortest_path(self, pos, goal): # A*
         op = set()
@@ -70,7 +64,7 @@ class Board:
             
             cl.add(q)
     
-    def heuristic_distance(self, space, goal): # TODO
+    def heuristic_distance(self, space, goal):
         return math.sqrt((space[0] - goal[0])**2 + (space[1] - goal[1])**2)
     
     def nearest_point(self, pos, points):
@@ -85,7 +79,7 @@ class Board:
             and new_pos[1] >= 0 \
             and new_pos[0] < w \
             and new_pos[1] < h \
-            and self.the_map[new_map_pos[0]][new_map_pos[1]] != WALLS, new_pos
+            and self.the_map.get(new_map_pos) != WALLS, new_pos
 
     def possible_moves(self, pos):
         for k, v in MOVES.items():
@@ -102,9 +96,9 @@ class Board:
                 map_pos[0] + i if orientation == 'H' else map_pos[0],
                 map_pos[1] + i if orientation == 'V' else map_pos[1]
             )
-            if new_map_pos[0] >= len(self.the_map) \
-                or new_map_pos[1] >= len(self.the_map[0]) \
-                or self.the_map[new_map_pos[0]][new_map_pos[1]] == WALLS \
+            if new_map_pos[0] >= (w*2)-1 \
+                or new_map_pos[1] >= (h*2)-1 \
+                or self.the_map[(new_map_pos)] == WALLS \
                 or i > 0 and min(list(new_map_pos)) == 0:
                 # Excludes:
                 # - wall occupied spaces
@@ -135,18 +129,18 @@ class Board:
         y = wall_y*2 if wall_orientation == 'V' else (wall_y*2)-1
         
         for i in range(3):
-            self.the_map[x+(i if wall_orientation == 'H' else 0)][y+(i if wall_orientation == 'V' else 0)] \
+            self.the_map[(x+(i if wall_orientation == 'H' else 0), y+(i if wall_orientation == 'V' else 0))] \
                 = WALLS
     
     def add_player(self, pos, i, walls_left):
         self.players[i] = (pos, walls_left, i == my_id)
 
         (x, y) = pos
-        self.the_map[x*2][y*2] = i
+        self.the_map[(x*2, y*2)] = i
 
 
     ### Utilities
-    def __repr__(self):
+    def __repr__(self): # TODO
         output = []
         for y in zip(*self.the_map):
             output.append(''.join([str(x) for x in y]))
