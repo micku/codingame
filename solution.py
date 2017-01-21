@@ -84,6 +84,24 @@ class Board:
             is_valid, new_pos = self.is_movement_valid(pos, v)
             if is_valid:
                 yield (k, new_pos)
+    
+    ### Board construction
+    def add_wall(self, pos, wall_orientation):
+        wall_x, wall_y = pos
+        x = wall_x*2 if wall_orientation == 'H' else (wall_x*2)-1
+        y = wall_y*2 if wall_orientation == 'V' else (wall_y*2)-1
+        
+        for i in range(3):
+            self.the_map[x+(i if wall_orientation == 'H' else 0)][y+(i if wall_orientation == 'V' else 0)] \
+                = WALLS
+
+    ### Utilities
+    def __repr__(self):
+        output = []
+        for y in zip(*self.the_map):
+            output.append(''.join([str(x) for x in y]))
+        return '\n'.join(output)
+
 
 
 class Node:
@@ -135,6 +153,8 @@ while True:
         wall_x, wall_y, wall_orientation = input().split()
         wall_x = int(wall_x)
         wall_y = int(wall_y)
+        
+        board.add_wall((wall_x, wall_y), wall_orientation)
 
     my_position = (players[my_id][0], players[my_id][1])
 
@@ -143,6 +163,8 @@ while True:
     shortest_path = board.shortest_path(my_position, goal)
     first_move = shortest_path.first_move()
 
+    print(repr(board), file=sys.stderr)
+    
     # action: LEFT, RIGHT, UP, DOWN or "putX putY putOrientation" to place a wall
     print(first_move.direction)
 
